@@ -1,0 +1,36 @@
+! stands for unimplemented in Chicago ntup
+
+Event
+-----
+RunNumber (int)
+EventNumber (int)
+!EventWeight (float)
+grl (bool): Good Run List
+!larerror
+!averageIntPerXing
+LBN (int): Lumi block?
+BunchCrossingID: (int)
+!isMC (bool)
+!ChannelNumber (int)
+mcweight (float): ? Why is this only set if doBasic=false
+!LUMI (float)
+muons: defaults to STACO
+muons_staco
+muons_calo
+muons_muid
+
+Muon
+----
+p (TLorentzVector)
+!allauthor (int)
+!hastrack (int)
+!loose (int)
+!medium (int)
+!tight (int)
+
+
+Function names:
+Get<Float_t>("name")
+Get<UInt_t>("name")
+BranchNames()
+fEvt->AddVec("name")
