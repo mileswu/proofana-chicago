@@ -22,6 +22,7 @@ muons_muid
 Muon
 ----
 p (TLorentzVector)
+charge (int)
 !allauthor (int)
 !hastrack (int)
 !loose (int)
