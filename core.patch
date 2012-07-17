@@ -1,0 +1,35 @@
+Index: core/EventBuilderBase.h
+===================================================================
+--- core/EventBuilderBase.h	(revision 293892)
++++ core/EventBuilderBase.h	(working copy)
+@@ -18,7 +18,7 @@
+ #include <TSelector.h>
+ #include <TChain.h>
+ #include <TFile.h>
+-//#include <TLeaf.h>
++#include <TLeaf.h>
+ #include <TBranchElement.h>
+ //#include <TBranchObject.h>
+ #include "Error.h"
+@@ -203,6 +203,7 @@
+ 			Tree()->SetBranchAddress(key.Data(), &branch->second.Obj, &branch->second.Branch);
+ 
+ 			if(branch->second.Branch->IsA() == TBranchElement::Class()) {
++				cout << "hi in this tbranchelement" << endl;
+ 				TClass* tclass = TClass::GetClass(((TBranchElement*)branch->second.Branch)->GetTypeName());
+ 				if(!tclass) {
+ 					TString msg("EventBuilderBase: ERROR no dictionary found for class ");
+@@ -214,7 +215,12 @@
+ 			else {
+ 				branch->second.Type = type; //This doesn't necessarily mean the type is correct, but means that the type will be consistent
+ 				branch->second.Delete = &DeletePointer<T*>;
+-				branch->second.Obj = new T();
++				int size = Tree()->GetBranch(key.Data())->GetLeaf(key.Data())->GetNdata();
++				if(size == 1)
++					branch->second.Obj = new T();
++				else { // It is an array
++					branch->second.Obj = new T[size]();
++				}
+ 				fBaseChain->SetBranchAddress(key.Data(), branch->second.Obj, &branch->second.Branch);
+ 			}
+ 		}
