@@ -25,10 +25,11 @@ Muon
 p (TLorentzVector)
 charge (int)
 !allauthor (int)
-!hastrack (int)
+!hastrack (int): not clear what track this is talking about
 !loose (int)
 !medium (int)
 !tight (int)
+iscombined (int)
 
 Truth
 -----
