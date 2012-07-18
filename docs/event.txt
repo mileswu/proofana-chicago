@@ -1,4 +1,5 @@
 ! stands for unimplemented in Chicago ntup
+- never implementing in Chicago ntup
 
 Event
 -----
@@ -29,9 +30,19 @@ charge (int)
 !medium (int)
 !tight (int)
 
+Truth
+-----
+!status (int)
+-barcode (int): Doesn't exist in chicago
+-charge: Not implementing charge because hard (not in ntup and need to look up pdgid)
+pdgid (int)
+parents (vector)
+children (vector)
 
 Function names:
 Get<Float_t>("name")
 Get<UInt_t>("name")
 BranchNames()
 fEvt->AddVec("name")
+static_cast<Particle *> <- for when using Obj
+
