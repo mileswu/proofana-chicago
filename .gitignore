@@ -1,0 +1,12 @@
+*Cint*
+*.o
+*.lo
+*.la
+*.d
+*.lock
+*.so
+*.log
+*.root
+*~
+*.par
+utils/*
