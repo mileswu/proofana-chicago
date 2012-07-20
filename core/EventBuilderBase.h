@@ -18,7 +18,7 @@
 #include <TSelector.h>
 #include <TChain.h>
 #include <TFile.h>
-//#include <TLeaf.h>
+#include <TLeaf.h>
 #include <TBranchElement.h>
 //#include <TBranchObject.h>
 #include "Error.h"
@@ -203,6 +203,7 @@ private :
 			Tree()->SetBranchAddress(key.Data(), &branch->second.Obj, &branch->second.Branch);
 
 			if(branch->second.Branch->IsA() == TBranchElement::Class()) {
+				cout << "hi in this tbranchelement" << endl;
 				TClass* tclass = TClass::GetClass(((TBranchElement*)branch->second.Branch)->GetTypeName());
 				if(!tclass) {
 					TString msg("EventBuilderBase: ERROR no dictionary found for class ");
@@ -214,16 +215,19 @@ private :
 			else {
 				branch->second.Type = type; //This doesn't necessarily mean the type is correct, but means that the type will be consistent
 				branch->second.Delete = &DeletePointer<T*>;
-				branch->second.Obj = new T();
+				int size = Tree()->GetBranch(key.Data())->GetLeaf(key.Data())->GetNdata();
+				if(size == 1)
+					branch->second.Obj = new T();
+				else { // It is an array
+					branch->second.Obj = new T[size]();
+				}
 				fBaseChain->SetBranchAddress(key.Data(), branch->second.Obj, &branch->second.Branch);
 			}
 		}
 		
 		//type check (should be fast...)
 		if(branch->second.Type != type) {
-			TString msg("EventBuilderBase: ERROR branch ");
-			msg.Append(key.Data());
-			msg.Append(" previously requested using type ");
+			TString msg("EventBuilderBase: ERROR branch previously requested using type ");
 			msg.Append(branch->second.Type->name());
 			msg.Append(", requested type is ");
 			msg.Append(type->name());
