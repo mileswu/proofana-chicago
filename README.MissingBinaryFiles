@@ -1,0 +1,22 @@
+Due to recent SVN troubles, ROOT files larger than 1 MB are now 
+no longer allowed in SVN. Hopefully this policy will be revised.
+In the mean time, the SUSYTools binary files over 1MB are stored
+as a tarball available from the following link:
+
+http://www.slac.stanford.edu/~bcbutler/ProofAnaBin.tar.gz
+
+To install, copy the tarball into this directory (top-level ProofAna
+directory, and type:
+
+tar -xzf ProofAnaBin.tar.gz
+
+Feel free to delete the tarball after extraction.
+
+If doing qg studies (or general studies?) which require some 
+pileup-reweighting histos supplied in config/lumicalcsR17, do
+
+cd ProofAna
+wget http://www.slac.stanford.edu/~swiatlow/plotsOut/qglumi.tar
+tar -xzf qglumi.tar
+
+

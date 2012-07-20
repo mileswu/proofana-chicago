@@ -1,0 +1,50 @@
+#
+# author: Nils Krumnack
+#
+
+# this makefile is for compiling individual files in configuration
+# tests
+
+#
+# root setup code
+#
+
+include @ROOT_MAKE@
+
+CXXFLAGS   += -I.. -I$(ROOTCOREBIN)/include $(ROOTCORETEST_CXXFLAGS) -DROOTCORE $(shell root-config --cflags)
+LDFLAGS    += $(ROOTCORETEST_LDFLAGS)
+SOFLAGS    += $(ROOTCORETEST_LDFLAGS) $(shell root-config --ldflags)
+
+ifeq ($(PLATFORM),macosx)
+SOFLAGS    += -install_name @rpath/lib$(PACKAGE).so
+endif
+
+ifneq ($(INPUT),)
+
+SRCFILE:=$(INPUT)/test.cxx
+OBJFILE:=$(INPUT)/test.o
+LIBFILE:=$(INPUT)/test.so
+BINFILE:=$(INPUT)/test
+
+compile: $(OBJFILE)
+
+linklib: $(LIBFILE)
+
+link: $(BINFILE)
+
+run: $(BINFILE)
+	$(BINFILE)
+
+$(OBJFILE): $(SRCFILE)
+	@echo "compiling $@"
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+$(LIBFILE): $(OBJFILE)
+	@echo "Linking $@"
+	@$(LD) $(CXXFLAGS) $(SOFLAGS) $^ -o $@
+
+$(BINFILE): $(OBJFILE)
+	@echo "Linking $@"
+	$(LD) $(LDFLAGS) $(shell $(ROOTCOREDIR)/scripts/get_ldflags.sh $(ROOTCORETEST_DEP))  $(ROOTLIBS) $< -o $@
+
+endif

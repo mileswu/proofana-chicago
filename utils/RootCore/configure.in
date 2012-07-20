@@ -1,0 +1,23 @@
+AC_INIT(configure.in)
+
+
+if test "x$ROOTSYS" == "x" ; then
+   AC_MSG_ERROR([could not locate cern root])
+fi
+root_prefix=`root-config --prefix`
+if test "x$root_prefix" == "x" ; then
+   root_prefix=$ROOTSYS
+fi
+ROOT_MAKE=`find "$root_prefix/." -name Makefile.arch | head -n 1`
+if test \! -f "$ROOT_MAKE" ; then
+   AC_MSG_ERROR([could not locate Makefile.arch])
+fi
+AC_SUBST(ROOT_MAKE)
+
+ROOT_CORE_DIR=`pwd`
+AC_SUBST(ROOT_CORE_DIR)
+
+AC_OUTPUT([Makefile-common])
+AC_OUTPUT([Makefile-single])
+AC_OUTPUT([scripts/setup.sh])
+AC_OUTPUT([scripts/setup.csh])

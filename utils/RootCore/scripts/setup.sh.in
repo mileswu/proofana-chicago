@@ -1,0 +1,8 @@
+export ROOTCOREDIR=@ROOT_CORE_DIR@
+test "x$ROOTCOREBIN" = "x" && export ROOTCOREBIN=@ROOT_CORE_DIR@
+test \! -d "$ROOTCOREBIN" && echo output directory not found, please create it && echo "  mkdir $ROOTCOREBIN" && return 1
+
+export PATH=$ROOTCOREBIN/bin:$PATH
+export LD_LIBRARY_PATH=$ROOTCOREBIN/lib:$LD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=$ROOTCOREBIN/lib:$DYLD_LIBRARY_PATH
+export PYTHONPATH=$ROOTCOREBIN/python:$PYTHONPATH

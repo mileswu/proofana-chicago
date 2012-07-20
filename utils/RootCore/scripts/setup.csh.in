@@ -1,0 +1,20 @@
+setenv ROOTCOREDIR @ROOT_CORE_DIR@
+if $?ROOTCOREBIN then
+    true
+else
+    setenv ROOTCOREBIN @ROOT_CORE_DIR@
+endif
+test \! -d "$ROOTCOREBIN" && echo output directory not found, please create it && echo "  mkdir $ROOTCOREBIN" && return 1
+
+setenv PATH $ROOTCOREBIN/bin:$PATH
+if $?LD_LIBRARY_PATH then
+    setenv LD_LIBRARY_PATH $ROOTCOREBIN/lib:$LD_LIBRARY_PATH
+endif
+if $?DYLD_LIBRARY_PATH then
+    setenv DYLD_LIBRARY_PATH $ROOTCOREBIN/lib:$DYLD_LIBRARY_PATH
+endif
+if $?PYTHONPATH then
+    setenv PYTHONPATH $ROOTCOREBIN/python:$PYTHONPATH
+else
+    setenv PYTHONPATH $ROOTCOREBIN/python
+endif

@@ -1,0 +1,155 @@
+#
+# author: Nils Krumnack, with input from Attila Krasznahorkay and Max Baak
+#
+
+# For documentation check:
+# https://twiki.cern.ch/twiki/bin/viewauth/Atlas/GoodRunsLists
+
+
+
+#
+# root setup code
+#
+
+CURDIR := $(shell pwd | xargs dirname)/StandAlone
+
+include @ROOT_MAKE@
+
+
+
+#
+# generic configuration options
+#
+
+DEPLIST := $(shell $(ROOTCOREDIR)/scripts/get_dependency.sh $(PACKAGE_DEP))
+
+PRGDIR = ../util
+SRCDIR = ../Root
+OBJDIR = ../obj
+LIBDIR = ../StandAlone
+BINDIR = ../bin
+TSTDIR = ../test
+BINTESTDIR  = ../test-bin
+
+LINK_DEF  = $(SRCDIR)/LinkDef.h
+DICT_BASE = $(OBJDIR)/$(PACKAGE)_Dict
+DICT_CINT = $(DICT_BASE).cxx
+
+SRCFILES = $(wildcard $(SRCDIR)/*.cxx)
+PRGFILES = $(wildcard $(PRGDIR)/*.cxx)
+TSTFILES = $(wildcard $(TSTDIR)/*.cxx)
+OBJFILES = $(patsubst %.cxx,%.o,$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SRCFILES))) $(shell test -f $(LINK_DEF) && echo $(DICT_BASE).o)
+DEPFILES = $(patsubst %.cxx,%.d,$(patsubst $(SRCDIR)/%,$(OBJDIR)/%,$(SRCFILES))) $(patsubst $(PRGDIR)/%.cxx,$(OBJDIR)/%.d,$(PRGFILES)) $(patsubst $(TSTDIR)/%.cxx,$(OBJDIR)/%.d,$(TSTFILES)) $(shell test -f $(LINK_DEF) && echo $(OBJDIR)/LinkDef.d)
+LIBFILE  = $(LIBDIR)/lib$(PACKAGE).so
+STATFILE = $(LIBDIR)/lib$(PACKAGE).a
+BINFILES = $(patsubst $(PRGDIR)/%.cxx,$(BINDIR)/%,$(PRGFILES)) $(patsubst $(TSTDIR)/%.cxx,$(BINTESTDIR)/%,$(TSTFILES))
+
+
+
+CXXFLAGS   += -I.. -I$(ROOTCOREBIN)/include $(PACKAGE_CXXFLAGS) $(shell $(ROOTCOREDIR)/scripts/get_cxxflags.sh $(PACKAGE)) -DROOTCORE $(shell root-config --cflags)
+MFLAGS      = -MM
+SOFLAGS    += $(PACKAGE_LDFLAGS) $(shell root-config --ldflags)
+
+ifeq ($(PLATFORM),macosx)
+SOFLAGS    += -dynamiclib -undefined dynamic_lookup -install_name @rpath/lib$(PACKAGE).so
+endif
+
+ifneq ($(BOOSTINCDIR),)
+CXXFLAGS   += -I$(BOOSTINCDIR)
+endif
+
+ifeq ($(PACKAGE_NOOPT),1)
+OPT  =
+OPT2 =
+endif
+
+
+#
+# generic rules
+#
+
+ifneq ($(PACKAGE_NOCC),1)
+default: $(DEPFILES) shlib $(BINFILES)
+else
+default:
+endif
+
+shlib: $(LIBFILE) $(STATFILE)
+
+clean:
+	@rm -rf $(BINDIR) $(BINTESTDIR) $(OBJDIR) $(LIBDIR)
+	@cd .. && rm -rf $(PACKAGE_CLEAN)
+
+RC_OBJ = \
+  @echo "Compiling $<" ; \
+  mkdir -p $(OBJDIR) ; \
+  $(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+
+RC_DEP = \
+  @echo "Making dependency for $<" ; \
+  set -e; rm -f $@; mkdir -p $(OBJDIR) ; \
+  $(CXX) $(CXXFLAGS) $(INCLUDES) $(MFLAGS) $< > $@.$$$$; \
+  sed 's,\($*\)\.o[ :]*,$(OBJDIR)/\1.o $@ : ,g' < $@.$$$$ > $@; \
+  rm -f $@.$$$$
+
+$(OBJDIR)/%.o : $(SRCDIR)/%.cxx
+	$(RC_OBJ)
+
+$(OBJDIR)/%.d : $(SRCDIR)/%.cxx
+	$(RC_DEP)
+
+$(OBJDIR)/%.o : $(PRGDIR)/%.cxx
+	$(RC_OBJ)
+
+$(OBJDIR)/%.d : $(PRGDIR)/%.cxx
+	$(RC_DEP)
+
+$(OBJDIR)/%.o : $(TSTDIR)/%.cxx
+	$(RC_OBJ)
+
+$(OBJDIR)/%.d : $(TSTDIR)/%.cxx
+	$(RC_DEP)
+
+$(OBJDIR)/%.o : $(OBJDIR)/%.cxx
+	$(RC_OBJ)
+
+$(OBJDIR)/%.d : $(OBJDIR)/%.cxx
+	$(RC_DEP)
+
+$(DICT_CINT) : $(LINK_DEF)
+	@echo "Running rootcint"
+	@mkdir -p $(OBJDIR)
+	@$(ROOTSYS)/bin/rootcint -f $(DICT_CINT) -c -p  $(CXXFLAGS) $(LINK_DEF)
+	@grep include $(LINK_DEF) >$(DICT_CINT)-tmp || true
+	@cat $(DICT_CINT) >>$(DICT_CINT)-tmp
+	@mv $(DICT_CINT)-tmp $(DICT_CINT)
+
+$(OBJDIR)/LinkDef.d : $(LINK_DEF)
+	@echo "Making dependency for $<" ; \
+	set -e; rm -f $@; mkdir -p $(OBJDIR) ; \
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $(MFLAGS) $< > $@.$$$$; \
+	sed 's,LinkDef\.o[ :]*,$(OBJDIR)/LinkDef.d $(DICT_BASE).cxx : ,g' < $@.$$$$ > $@; \
+	rm -f $@.$$$$
+
+
+$(LIBFILE): $(OBJFILES)
+	@echo "Linking $@"
+	@mkdir -p $(LIBDIR)
+	@$(LD) $(CXXFLAGS) $(SOFLAGS) $^ -o $@
+
+$(STATFILE): $(OBJFILES)
+	@echo "Linking $@"
+	@mkdir -p $(LIBDIR)
+	@ar rcs $@ $^
+
+$(BINDIR)/%:  $(OBJDIR)/%.o $(LIBFILE)
+	@echo "Linking $@"
+	@mkdir -p $(BINDIR)
+	@$(LD) -L../StandAlone $(LDFLAGS) $(shell $(ROOTCOREDIR)/scripts/get_ldflags.sh $(PACKAGE))  $(ROOTLIBS) $< -o $@
+
+$(BINTESTDIR)/%:  $(OBJDIR)/%.o $(LIBFILE)
+	@echo "Linking $@"
+	@mkdir -p $(BINTESTDIR)
+	@$(LD) -L../StandAlone $(LDFLAGS) $(shell $(ROOTCOREDIR)/scripts/get_ldflags.sh $(PACKAGE))  $(ROOTLIBS) $< -o $@
+
+-include $(DEPFILES)
