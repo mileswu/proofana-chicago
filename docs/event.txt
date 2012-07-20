@@ -30,6 +30,12 @@ charge (int)
 !medium (int)
 !tight (int)
 iscombined (int)
+Ptcone10
+Ptcone20
+Ptcone30
+Ptcone40
+nhitsct (int)
+nhitpix (int)
 
 Truth
 -----
