@@ -43,7 +43,7 @@ ifneq ($(CXX),clang++)
 	CXXFLAGS += -fno-builtin-memcmp
 endif
 
-INCLUDES += -I. -Icore -Ianalyses -Ieventbuilders -Iutils -I${ROOTSYS}/include
+INCLUDES += -I. -Icore -Ianalyses -Ieventbuilders -Iutils -I${ROOTSYS}/include -Ihelpers
 
 # add utils subdirectories if needed
 INCLUDES += -Iutils/TriggerMenuNtuple
@@ -96,7 +96,7 @@ ANACINTOBJLIST = $(patsubst %.h,%_Cint.o,$(ANAHLIST))
 # ProofAna source
 # -------------------------------------------------------------
 # add util subdirectories if needed
-CXXLIST = $(wildcard core/*.cxx) $(EBCXXLIST) $(ANACXXLIST)
+CXXLIST = $(wildcard core/*.cxx) $(EBCXXLIST) $(ANACXXLIST) $(wildcard helpers/*.cxx)
 HLIST   = $(PAHLIST) $(EBHLIST) $(ANAHLIST)
 OLIST   = $(patsubst %.cxx,%.o,$(CXXLIST)) $(FECINTOBJLIST) $(ANACINTOBJLIST) $(CINTOBJ)
 DLIST   = $(patsubst %.h,%.d,$(HLIST))
