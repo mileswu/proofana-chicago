@@ -307,6 +307,18 @@ bool MomentObj::Set(const MomKey& key, const TString& value) {
 	return true;
 }
 
+bool MomentObj::Set(const MomKey& key, TObject *value) {
+	map<MomKey,MapObj*>::iterator iter;
+	if(Find(key,iter)) {
+		delete iter->second;
+		iter->second = new ObjVecObj();
+	}
+	else m_keyMap.insert(iter, map<MomKey,MapObj*>::value_type(key, new ObjVecObj()));
+
+	Add(key, value);
+	return true;
+}
+
 bool MomentObj::AddVec(const MomKey& key, bool weakref) {
 	map<MomKey,MapObj*>::iterator iter;
 	if(Find(key,iter)) {

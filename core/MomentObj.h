@@ -493,6 +493,7 @@ class MomentObj : public TNamed {
 		bool Set(const MomKey& key, const TString& value);
 		bool Set(const MomKey& key, const char* value) {return Set(key,TString(value));}
 		bool Set(const MomKey& key, const std::string& value) {return Set(key,TString(value.c_str()));}
+		bool Set(const MomKey& key, TObject *value);
 
 		bool Get(const MomKey& key, bool& value) const;
 		bool Get(const MomKey& key, unsigned int& value) const;
@@ -529,7 +530,7 @@ class MomentObj : public TNamed {
 		void SortE(const MomKey& key, bool reverse = false); //Only for TLorentzVector containers
 		void SortPtAll(bool reverse = false); //Only sorts containers with objects inheriting from TLorentzVector
 		
-		TObject* Obj(const MomKey& key, int index) const { return Find(key)->second->Obj(index); }
+		TObject* Obj(const MomKey& key, int index = 0) const { return Find(key)->second->Obj(index); }
 		int Index(const MomKey& key, TObject const* const obj) const { return Find(key)->second->Index(obj); }
 		int Objs(const MomKey& key) const { return Find(key)->second->Objs(); }
 		vector<TObject*>* ObjVec(const MomKey& key) { return Find(key)->second->ObjVec(); }
