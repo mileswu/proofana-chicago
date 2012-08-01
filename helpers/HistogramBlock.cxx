@@ -17,17 +17,17 @@ using namespace std;
 void InitializeRegionBlock(AnalysisBase *A, TString blockname) {	
 	A->OutputDir()->Dir()->mkdir(blockname.Data());
 	A->OutputDir()->cd(blockname.Data());
-  new TH1F("ptmu1", "", 100, 0, 100);
-  new TH2F("ptmu1_vs_etamu1", "", 100, 0, 100, 80, -4, 4);
+	new TH1F("ptmu1", "", 100, 0, 100);
+	new TH2F("ptmu1_vs_etamu1", "", 100, 0, 100, 80, -4, 4);
 	A->OutputDir()->cd("..");
 }
 
 void FillRegionBlock(AnalysisBase *A, TString blockname){
 	A->SetOutputDir(A->OutputDir()->Dir()->GetDirectory(blockname.Data()));
-  if(A->muons() > 0) {
+	if(A->muons() > 0) {
 		A->Fill("ptmu1", A->muon(0).p.Pt());
 		A->Fill("ptmu1_vs_etamu1", A->muon(0).p.Pt(), A->muon(0).p.Eta());
-  }
+	}
 	A->SetOutputDir(A->OutputDir()->Dir()->GetDirectory(".."));
 }
 
