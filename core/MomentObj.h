@@ -537,6 +537,18 @@ class MomentObj : public TNamed {
 	
 		//Aliasing vectors of objects (i.e., to create a subset of jets or electrons)
 		void AliasVec(const MomKey& src, const MomKey& dest);
+		
+		//Convenient casting methods
+		template <class T>
+		T& Obj(const MomKey& key, int index = 0) { return *dynamic_cast<T*>(Obj(key, index)); }
+		template <class T>
+		vector<T&> ObjVec(const MomKey& key) {
+			vector<T&>retval;
+			for(int i=0; i<Objs(key); i++) {
+				retval.push_back(Obj<T>(key, i));
+			}
+			return retval;
+		}
 
 		ClassDef(MomentObj,1);
 	
