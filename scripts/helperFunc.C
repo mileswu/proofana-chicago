@@ -2,12 +2,19 @@
 
 int LoadLibraries()
 {
+	TString rootcoreenv("RootCoreEnv.");
+	rootcoreenv.Append(TUUID().AsString());
+	rootcoreenv.Append(".txt");
+
 	if(!gSystem->Getenv("ROOTCOREDIR")) {
-		if(!gSystem->AccessPathName("RootCoreEnv.txt")) gSystem->Unlink("RootCoreEnv.txt");
-		gSystem->Exec("source ../utils/RootCore/scripts/setup.sh; echo ROOTCOREDIR=$ROOTCOREDIR >> RootCoreEnv.txt; echo ROOTCOREBIN=$ROOTCOREBIN >> RootCoreEnv.txt; echo PATH=$PATH >> RootCoreEnv.txt; echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH >> RootCoreEnv.txt; echo DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH >> RootCoreEnv.txt; echo PYTHONPATH=$PYTHONPATH >> RootCoreEnv.txt;");
+		if(!gSystem->AccessPathName(rootcoreenv.Data())) gSystem->Unlink(rootcoreenv.Data());
+		TString cmd = TString("source ../utils/RootCore/scripts/setup.sh; echo ROOTCOREDIR=$ROOTCOREDIR >> RootCoreEnv.txt; echo ROOTCOREBIN=$ROOTCOREBIN >> RootCoreEnv.txt; echo PATH=$PATH >> RootCoreEnv.txt; echo LD_LIBRARY_PATH=$LD_LIBRARY_PATH >> RootCoreEnv.txt; echo DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH >> RootCoreEnv.txt; echo PYTHONPATH=$PYTHONPATH >> RootCoreEnv.txt;");
+
+		cmd.ReplaceAll("RootCoreEnv.txt", rootcoreenv.Data());
+		gSystem->Exec(cmd.Data());
 	
 		char buffer[2000];
-		ifstream fh("RootCoreEnv.txt");
+		ifstream fh(rootcoreenv.Data());
     	if (!fh.is_open()) {
       		cout << "LoadLibraries ERROR opening temporary RootCore environment variable dump RootCoreEnv.txt" << endl;
       		return 1;
@@ -34,7 +41,7 @@ int LoadLibraries()
 		}
     	fh.close();
     	
-    	gSystem->Unlink("RootCoreEnv.txt");
+    	gSystem->Unlink(rootcoreenv.Data());
     }
 
 	gSystem->CompileMacro("../utils/RootCore/scripts/load_packages.C","k");
