@@ -20,9 +20,6 @@ localSetupROOT
 echo `pwd`
 date
 
-ls -lh /atlas
-ls /atlas/uct3/data/users/antonk/NTUPLE/v1_29d/user.kapliy.UCNTUP.mc11_7TeV.106047.PythiaZmumu_no_filter.merge.AOD.e815_s1272_s1274_r3043_r2993.j.mc11c.v1_29d.120218115907/
-
 DATASET=`sed -n '1p' < options.batch`
 TREE=`sed -n '2p' < options.batch`
 FILESNUM=`sed -n '3p' < options.batch`
