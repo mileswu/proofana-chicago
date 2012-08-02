@@ -3,7 +3,7 @@
 #include <TFileCollection.h>
 #include <TDataSetManagerFile.h>
 
-void runLocal(TString dataset, TString treename = "")
+void runLocal(TString dataset, TString treename = "", int nfiles = -1)
 {
 	ProofAna* ana = new ProofAna();
 	
@@ -23,7 +23,7 @@ void runLocal(TString dataset, TString treename = "")
 
 	//Register dataset, if non-existent
 	if(!mgr.ExistsDataSet(dataset)) {
-		TFileCollection* dset = new TFileCollection(dataset,"",dsetfile);
+		TFileCollection* dset = new TFileCollection(dataset,"",dsetfile, nfiles);
 		mgr.RegisterDataSet(dataset,dset,"V"); //This seems to return true regardless of success or failure at the moment
 		if(treename.CompareTo("")!=0) {
 			TProof* lite = TProof::Open("lite://");
