@@ -597,6 +597,7 @@ void ProofAna::ReplaceOutputFile(AnaKey name)
 	static const MomKey mDATASET("DATASET");
 	TString output(name.Data());
 	if(name==adefault) output = fConfig->String(mDATASET);
+	output.Append(filenameSuffix);
 
 	//Close old file, add to output list, save name
 	map<AnaKey,TFile*>::iterator tfile = fFiles.find(name);
@@ -654,6 +655,7 @@ void ProofAna::InitOutputFile(AnaKey name)
 	static const MomKey mDATASET("DATASET");
 	TString output(name.Data());
 	if(name==adefault) output = fConfig->String(mDATASET);
+	output.Append(filenameSuffix);
 
 	bool doMerge = true;
 	static const MomKey mMERGE("MERGE");
