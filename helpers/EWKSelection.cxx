@@ -6,9 +6,6 @@ using namespace std;
 #define MUON_PARAM_AUTHOR_STACO 6
 
 bool passesMCPQualityCuts(Particle &muon) {
-
-  
-  
   if(muon.Int("expectBLayerHit") == 1 && muon.Int("nBLayerHits") == 0) return false;
   if(muon.Int("nPixHits") + muon.Int("nPixDead") == 0) return false;
   if(muon.Int("nSCTHits") + muon.Int("nSCTDead") <= 4) return false;
@@ -33,33 +30,33 @@ bool passesMCPQualityCuts(Particle &muon) {
 bool EWKMuonSelectionPasses(Particle &muon, double ptcut, double etacut, TH1* cutflow) {
 
   int iCount=0;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   
   // Quality cuts
   if(muon.Int("author") != MUON_PARAM_AUTHOR_STACO) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   if(muon.Int("isCombined") != true) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   if(passesMCPQualityCuts(muon) != true) return false; 
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   
   // Kinematic cuts
   if(fabs(muon.p.Eta()) > etacut) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   if(muon.p.Pt() < ptcut) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   
   // Isolation
   if(muon.Float("Etcone20") / muon.p.Pt() > 0.3) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   if(muon.Float("Ptcone20") / muon.p.Pt() > 0.15) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   
   // Impact parameter cuts
   if(fabs(muon.Float("z0")) > 2) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   if(fabs(muon.Float("d0") / muon.Float("d0_err")) > 3.5) return false;
-  cutflow->Fill(iCount); iCount++; cout<<"Fill: "<<iCount<<endl;
+  cutflow->Fill(iCount); iCount++;
   
   return true;
 }
