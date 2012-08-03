@@ -19,7 +19,7 @@ void InitializeRegionBlock(AnalysisBase *A, TString blockname) {
 	A->OutputDir()->cd(blockname.Data());
 	new TH1F("ptmu1", "", 100, 0, 100);
 	new TH2F("ptmu1_vs_etamu1", "", 100, 0, 100, 80, -4, 4);
-	A->OutputDir()->cd("..");
+	A->OutputDir()->cd();
 }
 
 void FillRegionBlock(AnalysisBase *A, TString blockname){
