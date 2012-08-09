@@ -203,7 +203,6 @@ private :
 			Tree()->SetBranchAddress(key.Data(), &branch->second.Obj, &branch->second.Branch);
 
 			if(branch->second.Branch->IsA() == TBranchElement::Class()) {
-				cout << "hi in this tbranchelement" << endl;
 				TClass* tclass = TClass::GetClass(((TBranchElement*)branch->second.Branch)->GetTypeName());
 				if(!tclass) {
 					TString msg("EventBuilderBase: ERROR no dictionary found for class ");
