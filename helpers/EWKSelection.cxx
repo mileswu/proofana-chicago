@@ -66,7 +66,7 @@ void EWKMuonSelectionFilter(AnalysisBase *analysis, const MomKey& key, double pt
   //Histogram to track cutflow for muon selection
   if(!analysis->OutputDir()->Get("EWK_muon_selection_cutflow")) {
     analysis->OutputDir()->cd();
-    new TH1F("EWK_muon_selection_cutflow","EWK_muon_selection_cutflow",100,0,100);
+    new TH1F("EWK_muon_selection_cutflow","EWK_muon_selection_cutflow",20,0,20);
   }
 
   TH1 *cutflow = dynamic_cast<TH1*>(analysis->OutputDir()->Get("EWK_muon_selection_cutflow"));
