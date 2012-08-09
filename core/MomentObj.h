@@ -542,10 +542,10 @@ class MomentObj : public TNamed {
 		template <class T>
 		T& Obj(const MomKey& key, int index = 0) { return *dynamic_cast<T*>(Obj(key, index)); }
 		template <class T>
-		vector<T&> ObjVec(const MomKey& key) {
-			vector<T&>retval;
+		vector<T*> ObjVec(const MomKey& key) {
+			vector<T*>retval;
 			for(int i=0; i<Objs(key); i++) {
-				retval.push_back(Obj<T>(key, i));
+				retval.push_back(&Obj<T>(key, i));
 			}
 			return retval;
 		}
