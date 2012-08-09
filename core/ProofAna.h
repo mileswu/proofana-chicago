@@ -38,8 +38,8 @@ public :
 	TString           filenameSuffix;
 
 	//Standard TSelector methods
-	ProofAna(TTree* /*tree*/ =0) : fConfig(0), fEventBuilder(0), fTimer(new Timer()), fCurrentTree(0), fEntry(-1), fProcessed(0), fCounter(10000),
-		fDebug(false), fSaveTimers(false), fDefaultFileInit(false), fNFiles(0), filenameSuffix("") { } 
+	ProofAna(TTree* /*tree*/ =0) : filenameSuffix(""), fConfig(0), fEventBuilder(0), fTimer(new Timer()), fCurrentTree(0), fEntry(-1), fProcessed(0), fCounter(10000),
+		fDebug(false), fSaveTimers(false), fDefaultFileInit(false), fNFiles(0) { } 
 	virtual 			~ProofAna() { delete fTimer;}
 	virtual Int_t   	Version() const { return 2; }
 	virtual void    	Begin(TTree* tree);
