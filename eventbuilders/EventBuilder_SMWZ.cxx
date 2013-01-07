@@ -178,6 +178,8 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
 		success = success && CopyTracks();
 	if(doTrack && doMuons && doMiniIsolation)
 		success = success && AddMuonMiniIsolation();
+	if(fEvt->isMC() && doTruth)
+		success = success && CopyTruth();
 	if(fEvt->isMC() && doTruth && doMuons)
 	  success = success && CopyMuonsTruth();
 	if(doMET)
@@ -211,6 +213,28 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
 
 Bool_t EventBuilder_SMWZ::CopyJets()
 {
+  if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyJets() Begin" << endl;
+
+	TString prefix("jet_AntiKt4LCTopo_");
+
+	fEvt->AddVec("jets");
+
+	unsigned int nJets = Get<Int_t>(prefix + "n");
+	for(unsigned int iJ = 0; iJ < nJets; iJ++) {
+		Particle *jet = new Particle();
+		jet->p.SetPtEtaPhiM(
+			Get<vector<float> >(prefix + "pt")[iJ]*UNITCONVERSION,
+			Get<vector<float> >(prefix + "eta")[iJ],
+		  Get<vector<float> >(prefix + "phi")[iJ],
+			Get<vector<float> >(prefix + "m")[iJ]*UNITCONVERSION);
+
+		fEvt->Add("jets", jet);
+	}
+
+
+  if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyJets() Done" << endl;
+	return true;
+
 }
 
 Bool_t EventBuilder_SMWZ::CopyMET()
@@ -298,40 +322,41 @@ Bool_t EventBuilder_SMWZ::CopyElectrons()
 
 	//Constant for mass
 	double electron_mass = 0.510998/1000.0;
-
+	TString prefix("el_");
+	
 	fEvt->AddVec("electrons");
 
-	unsigned int nElectrons = Get<Int_t>("nele");
+	unsigned int nElectrons = Get<Int_t>(prefix + "n");
 	for(unsigned int iE = 0; iE < nElectrons; iE++) {
 		Particle *electron = new Particle();
-		electron->Set("charge", (GetP<Int_t>("ele_q"))[iE]);
-		electron->Set("d0", GetP<Float_t>("ele_dxpv")[iE]);
-		electron->Set("d0_err", sqrt(GetP<Float_t>("ele_covdxpv")[iE]));
-		electron->Set("z0", GetP<Float_t>("ele_zxpv")[iE]);
+		electron->Set("charge", Get<vector<int> >(prefix + "charge")[iE]);
+		
+		electron->Set("d0_err", Get<vector<float> >(prefix + "tracksigd0pv")[iE]);
+		electron->Set("z0", Get<vector<float> >(prefix + "trackz0pv")[iE]);
+		electron->Set("d0", Get<vector<float> >(prefix + "trackd0pv")[iE]);
 
 		// Quality
-		electron->Set("nPixHits", GetP<Int_t>("ele_nhitpix")[iE]);
-		electron->Set("nSCTHits", GetP<Int_t>("ele_nhitsct")[iE]);
+		electron->Set("nPixHits", Get<vector<int> >(prefix + "nPixHits")[iE]);
+		electron->Set("nSCTHits", Get<vector<int> >(prefix + "nSCTHits")[iE]);
 		
-		int quality_bitmask = GetP<UShort_t>("ele_quality")[iE];
-		electron->Set("tightPP", (bool)((quality_bitmask & (1 << 5)) >> 5));
-		electron->Set("mediumPP", (bool)((quality_bitmask & (1 << 4)) >> 4));
-		electron->Set("loosePP", (bool)((quality_bitmask & (1 << 3)) >> 3));
+		electron->Set("mediumPP", (bool)Get<vector<int> >(prefix + "mediumPP")[iE]);
+		electron->Set("tightPP", (bool)Get<vector<int> >(prefix + "tightPP")[iE]);
+		electron->Set("loosePP", (bool)Get<vector<int> >(prefix + "loosePP")[iE]);/*
 		electron->Set("tight", (bool)((quality_bitmask & (1 << 2)) >> 2));
 		electron->Set("medium", (bool)((quality_bitmask & (1 << 2)) >> 1));
 		electron->Set("loose", (bool)(quality_bitmask & 1));
-
-		electron->Set("author", (int)GetP<UShort_t>("ele_author")[iE]);
-		electron->Set("OQ", (int)GetP<UInt_t>("ele_oq")[iE]);
+		*/
+		electron->Set("author", Get<vector<int> >(prefix + "author")[iE]);
+		electron->Set("OQ", Get<vector<unsigned int> >(prefix + "OQ")[iE]);
 		
 		// Pt/Eta/Phi
-		electron->Set("trackEta", GetP<Float_t>("ele_etatrk")[iE]);
-		electron->Set("trackPhi", GetP<Float_t>("ele_phitrk")[iE]);
-		electron->Set("trackPt", GetP<Float_t>("ele_pttrk")[iE]);
+		electron->Set("trackEta", Get<vector<float> >(prefix + "tracketa")[iE]);
+		electron->Set("trackPhi", Get<vector<float> >(prefix + "trackphi")[iE]);
+		electron->Set("trackPt", Get<vector<float> >(prefix + "trackpt")[iE]*UNITCONVERSION);
 
-		electron->Set("clusterEta", GetP<Float_t>("ele_etaclus")[iE]);
-		electron->Set("clusterPhi", GetP<Float_t>("ele_phiclus")[iE]);
-		electron->Set("clusterE", GetP<Float_t>("ele_etclus")[iE] * cosh(electron->Float("clusterEta")));
+		electron->Set("clusterEta", Get<vector<float> >(prefix + "cl_eta")[iE]);
+		electron->Set("clusterPhi", Get<vector<float> >(prefix + "cl_phi")[iE]);
+		electron->Set("clusterE", Get<vector<float> >(prefix + "cl_E")[iE]*UNITCONVERSION);
 
 		if(electron->Int("nPixHits") + electron->Int("nSCTHits") >= 4) {
 			electron->p.SetPtEtaPhiM(
@@ -348,15 +373,13 @@ Bool_t EventBuilder_SMWZ::CopyElectrons()
 		}
 		
 		// Isolation cones
-		electron->Set("Ptcone20", GetP<Float_t>("ele_ptcone20")[iE]);
-		electron->Set("Ptcone30", GetP<Float_t>("ele_ptcone30")[iE]);
-		electron->Set("Ptcone40", GetP<Float_t>("ele_ptcone40")[iE]);
-		electron->Set("Etcone20", GetP<Float_t>("ele_etcone20")[iE]);
-		electron->Set("Etcone30", GetP<Float_t>("ele_etcone30")[iE]);
-		electron->Set("Etcone40", GetP<Float_t>("ele_etcone40")[iE]);
-		electron->Set("Etcone20_corrected", GetP<Float_t>("ele_etcone20_cor")[iE]);
-		electron->Set("Etcone30_corrected", GetP<Float_t>("ele_etcone30_cor")[iE]);
-		electron->Set("Etcone40_corrected", GetP<Float_t>("ele_etcone40_cor")[iE]);
+		electron->Set("Ptcone20", Get<vector<float> >(prefix + "ptcone20")[iE]*UNITCONVERSION);
+		electron->Set("Ptcone30", Get<vector<float> >(prefix + "ptcone30")[iE]*UNITCONVERSION);
+		electron->Set("Ptcone40", Get<vector<float> >(prefix + "ptcone40")[iE]*UNITCONVERSION);
+		electron->Set("Etcone20", Get<vector<float> >(prefix + "Etcone20")[iE]*UNITCONVERSION);
+		electron->Set("Etcone20_corrected", Get<vector<float> >(prefix + "Etcone20_pt_corrected")[iE]*UNITCONVERSION);
+		electron->Set("Etcone30", Get<vector<float> >(prefix + "Etcone30")[iE]*UNITCONVERSION);
+		electron->Set("Etcone40", Get<vector<float> >(prefix + "Etcone40")[iE]*UNITCONVERSION);
 
 		fEvt->Add("electrons", electron);
 	}
@@ -543,7 +566,7 @@ Bool_t EventBuilder_SMWZ::CopyTruth()
 	unsigned int nTruth = Get<Int_t>("mc_n");
 	for(unsigned int iT = 0; iT < nTruth; iT++) {
 		int status = Get<vector<int> >("mc_status")[iT];
-		if(status != 1 && status != 2 && status != 4) continue; //Recommendation from https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PhysicsAnalysisWorkBookExMCRel15
+		//if(status != 1 && status != 2 && status != 4) continue; //Recommendation from https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PhysicsAnalysisWorkBookExMCRel15
 
 		Particle *truth = new Particle();
 		truth->p.SetPtEtaPhiM(
@@ -552,8 +575,8 @@ Bool_t EventBuilder_SMWZ::CopyTruth()
 		  Get<vector<float> >("mc_phi")[iT],
 			Get<vector<float> >("mc_m")[iT]*UNITCONVERSION);
 		truth->Set("pdgId", Get<vector<int> >("mc_pdgId")[iT]);
-		if(truth->Int("pdgId") == 23)
-			cout << "pdgid: " << truth->Int("pdgId") << endl;
+		truth->Set("barcode", Get<vector<int> >("mc_barcode")[iT]);
+		truth->Set("status", status);
 
 		truth->Set("_indexinntup", iT);
 		truth->AddVec("children", true); // weak reference
