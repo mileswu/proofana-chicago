@@ -19,13 +19,13 @@ using std::cout;
 using std::endl;
 
 bool Config::ReadFile(const TString& cfgfile) {
-    char buffer[256];
+    char buffer[2560];
     ifstream fh(cfgfile);
     if (!fh.is_open()) {
       cout << "Config: ERROR opening config file " << cfgfile << endl;
       return false;
     }
-    fh.getline(buffer,250);    
+    fh.getline(buffer,2500);    
 	while (!fh.eof()) {
 		TString n(buffer);
 
@@ -41,12 +41,12 @@ bool Config::ReadFile(const TString& cfgfile) {
 			n = TString(n(0,comment));
 		}
 		if(n.IsNull()) {
-			fh.getline(buffer,250);      		
+			fh.getline(buffer,2500);      		
       		continue;				
 		}
       	if (!n.Contains("=")) {
       		cout << "Config: Problem parsing line:" << endl << n << endl << "Fix your config file!" << endl;
-			fh.getline(buffer,250);      		
+			fh.getline(buffer,2500);      		
       		continue;
       	}
 
@@ -75,7 +75,7 @@ bool Config::ReadFile(const TString& cfgfile) {
 		
 		Set(key,value);
 
-		fh.getline(buffer,250);
+		fh.getline(buffer,2500);
     }
     fh.close();
     
