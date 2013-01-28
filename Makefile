@@ -169,7 +169,7 @@ $(ROOTCORE) :
 # Implicit rule to compile all classes
 %.o : %.cxx
 	@echo "Compiling $<"
-	@$(CXX) -MD $(CXXFLAGS) $(INCLUDES) -c $< -o $*.o 
+	@$(CXX) -MD $(CXXFLAGS) $(INCLUDES) -c $< -o $*.o -g 
 	
 # Implicit rule to write ROOTCINT dictionary classes for Analyses, EventBuilders
 %_Cint.cxx : %.h $(PAHLIST) %_LinkDef.h
