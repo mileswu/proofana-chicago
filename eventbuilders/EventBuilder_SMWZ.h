@@ -40,11 +40,11 @@ public :
    Bool_t   CopyElectrons();
 	 Bool_t		CopyMET();
    Bool_t   CopyTracks();
+   Bool_t   CopyClusters();
    /*Bool_t   CopyPhotons();
    Bool_t   CopyVertices();	
    Bool_t   CopyJets();
    Bool_t   CopyJet(TString jetType = "", TString jetClass = "");
-   Bool_t   CopyClusters();
    Bool_t   CopySubjets();*/
 
 

@@ -123,7 +123,7 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
     fEvt->Set("larerror"          ,         Get<int>("larError")); 
     fEvt->Set("averageIntPerXing" ,         Get<Float_t>("averageIntPerXing"));
     fEvt->Set("LBN"               , (int)   Get<UInt_t>("lbn"));
-    fEvt->Set("BunchCrossingID"   , (int)   Get<UInt_t>("bcid"));
+    //fEvt->Set("BunchCrossingID"   , (int)   Get<UInt_t>("bcid"));
     
 		///=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		/// Event level options
@@ -186,8 +186,9 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
 		success = success & CopyMET();
 	if(fEvt->isMC() && doTruth && doMET)
 		success = success & CopyTruthMET();
-  
-  /*success = success && CopyClusters();
+	if(doLCCluster)
+	  success = success && CopyClusters();
+	/*
   success = success && CopyVertices();
   success = success && AddTruthLinks();
   success = success && CopyPhotons();
@@ -421,6 +422,26 @@ Bool_t EventBuilder_SMWZ::CopyTracks()
 
   if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyTracks() Done" << endl;
 	return true;
+}
+
+Bool_t EventBuilder_SMWZ::CopyClusters() 
+{
+  if (fEvt->Debug()) cout << "EventBuilder_SMWZ: DEBUG CopyClusters() " << endl;	
+
+	fEvt->AddVec("clustersLCTopo");
+
+	for(unsigned int iCl = 0; iCl < Get<UInt_t>("cl_n"); iCl++) {
+		Particle* cl = new Particle();
+		float pt  = Get<vector<float> >("cl_pt") .at(iCl);
+		float eta = Get<vector<float> >("cl_eta").at(iCl);
+		float phi = Get<vector<float> >("cl_phi").at(iCl);
+		cl->p.SetPtEtaPhiM(pt*UNITCONVERSION,eta,phi,0);
+
+		fEvt->Add("clustersLCTopo",cl);
+	}
+  
+  if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyClusters(): scheduled clusters" << endl;
+  return kTRUE;
 }
 
 Bool_t EventBuilder_SMWZ::AddMuonMiniIsolation()
