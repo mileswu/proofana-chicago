@@ -15,7 +15,9 @@ fi
 
 export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase
 source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh > /dev/null
-localSetupROOT
+export X509_USER_PROXY=${HOME}/.globus/gridproxy.cert
+export XrdSecGSISRVNAMES="*"
+localSetupROOT --rootVersion=5.34.03-x86_64-slc5-gcc4.3
 
 echo `pwd`
 date
