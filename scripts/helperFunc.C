@@ -47,12 +47,12 @@ int LoadLibraries()
 	gSystem->CompileMacro("../utils/RootCore/scripts/load_packages.C","k");
 	load_packages();
 	
-	if (gSystem->Load("../lib/libTriggerMenuNtuple") == -1) return -1;
-	if (gSystem->Load("../lib/libMctLib") == -1) return -1;
-	if (gSystem->Load("../lib/libFastjet") == -1) return -1;
-	if (gSystem->Load("../lib/libFastjetTools") == -1) return -1;
-	if (gSystem->Load("../lib/libFastjetPlugins") == -1) return -1;
-	if (gSystem->Load("../lib/libqgTag") == -1) return -1;
+	//if (gSystem->Load("../lib/libTriggerMenuNtuple") == -1) return -1;
+	//if (gSystem->Load("../lib/libMctLib") == -1) return -1;
+	//if (gSystem->Load("../lib/libFastjet") == -1) return -1;
+	//if (gSystem->Load("../lib/libFastjetTools") == -1) return -1;
+	//if (gSystem->Load("../lib/libFastjetPlugins") == -1) return -1;
+	//if (gSystem->Load("../lib/libqgTag") == -1) return -1;
 	if (gSystem->Load("../lib/libProofAna") == -1) return -1;
 	return 0;
 }
