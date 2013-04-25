@@ -50,6 +50,7 @@ int LoadLibraries()
 	if (gSystem->Load("../lib/libTriggerMenuNtuple") == -1) return -1;
 	if (gSystem->Load("../lib/libMctLib") == -1) return -1;
 	if (gSystem->Load("../lib/libFastjet") == -1) return -1;
+	if (gSystem->Load("../lib/libFastjetTools") == -1) return -1;
 	if (gSystem->Load("../lib/libFastjetPlugins") == -1) return -1;
 	if (gSystem->Load("../lib/libqgTag") == -1) return -1;
 	if (gSystem->Load("../lib/libProofAna") == -1) return -1;
@@ -105,6 +106,15 @@ void WriteSUSYObjDefObject(TFile* options, bool isData, bool isAF2)
 	myObj->SetName("mySUSYObjDef");
 	options->cd();
 	myObj->Write();
+}
+
+void WriteJetCalibrationToolObject(TFile *options, TString config, bool isData)
+{
+	//JetCalibrationTool *myJES = new JetCalibrationTool("AntiKt4LCTopo", config, isData);
+	JetCalibrationTool *myJES = new JetCalibrationTool("AntiKt4TopoEM", config, isData);
+	myJES->SetName("myJetCalibrationTool");
+	options->cd();
+	myJES->Write();
 }
 
 void WriteMuonTriggerSFToolObject(TFile* options)
@@ -175,6 +185,28 @@ void Write0LeptonPileupReweightingObject(TFile* options)
   myPile->SetUnrepresentedDataAction(2); //Action needs investigation
   myPile->Initialize();
   myPile->SetName("myPRW0Lepton");
+  options->cd();
+  myPile->Write();
+}
+
+void WriteMuonSmear(TFile* options)
+{
+	MuonSmear::SmearingClass *mcp_smear = new MuonSmear::SmearingClass();
+	mcp_smear->SetAlgoSmearRelDir("Data12", "staco", "q_pT", "Rel17.2", "../utils/MuonMomentumCorrections/share/");
+	mcp_smear->UseGeV();
+  mcp_smear->SetName("myMuonSmear");
+  options->cd();
+  mcp_smear->Write();
+}
+
+void WriteMC12aPileupReweightingObject(TFile* options)
+{
+  Root::TPileupReweighting* myPile = new Root::TPileupReweighting();
+  myPile->AddConfigFile("../utils/PileupReweighting/share/mc12a_defaults.prw.root");
+  myPile->AddLumiCalcFile("../config/reweighting/ilumicalc_histograms_None_200841-201556.root");
+  //myPile->SetUnrepresentedDataAction(2); //Action needs investigation
+  myPile->Initialize();
+  myPile->SetName("myPRW");
   options->cd();
   myPile->Write();
 }
