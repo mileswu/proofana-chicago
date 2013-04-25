@@ -23,6 +23,10 @@
 #include "TKey.h"
 #include <iostream>
 #include "TPRegexp.h"
+#include "GoodRunsLists/TGoodRunsList.h"
+#include "ApplyJetCalibration/ApplyJetCalibration.h"
+#include "MuonMomentumCorrections/SmearingClass.h"
+
 
 #define UNITCONVERSION 0.001
 
@@ -42,7 +46,14 @@ EventBuilder_SMWZ::~EventBuilder_SMWZ(){
 ///=========================================
 /// Initialize
 ///=========================================
-void EventBuilder_SMWZ::Initialize() {}
+void EventBuilder_SMWZ::Initialize()
+{
+	myGRL = (Root::TGoodRunsList*)fInput->FindObject("myGRL");
+	myJetCalibrationTool = (JetCalibrationTool*)fInput->FindObject("myJetCalibrationTool");
+	myJetCalibrationTool->UseGeV(true);
+	myPRW = (Root::TPileupReweighting*)fInput->FindObject("myPRW");
+	myMuonSmear = (MuonSmear::SmearingClass*)fInput->FindObject("myMuonSmear");
+}
 
 ///=========================================
 /// CopyEvent
@@ -106,6 +117,7 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
   fEvt->Cfg()->Get("DOMINIISOLATION"         , doMiniIsolation    );
   fEvt->Cfg()->Get("DOMET"         , doMET    );
   fEvt->Cfg()->Get("DOJETS"         , doJets    );
+  fEvt->Cfg()->Get("GRL"         , isGRL);
 
   if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyEvent(): DEBUG Setting up configs" << endl;
 
@@ -114,6 +126,20 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
   ///=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   if (doBasic) {
     if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyEvent(): DEBUG Setting basic event level quantities" << endl;
+
+		if(isGRL) {
+			if(!myGRL)
+				Abort("GRL not loaded");
+			if(!myGRL->HasRunLumiBlock(Get<UInt_t>("RunNumber"), Get<UInt_t>("lbn"))) {
+				cout << "did not pass" << endl;
+				fEvt->Set("PassedGRL", false); }
+			else {
+				fEvt->Set("PassedGRL", true);
+			}
+		 }
+		else {
+				fEvt->Set("PassedGRL", true);
+		}
  
     /// Overall event info
     fEvt->Set("RunNumber"         , (int)   Get<UInt_t>("RunNumber"));
@@ -124,6 +150,16 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
     fEvt->Set("averageIntPerXing" ,         Get<Float_t>("averageIntPerXing"));
     fEvt->Set("LBN"               , (int)   Get<UInt_t>("lbn"));
     //fEvt->Set("BunchCrossingID"   , (int)   Get<UInt_t>("bcid"));
+		int npv=0;
+		for(int i=0; i < Get<Int_t>("vxp_n"); i++) {
+			if(Get<vector<int> >("vxp_nTracks")[i] >= 2)
+				npv++;
+		}
+		fEvt->Set("npv", npv);
+
+
+		fEvt->Set("EF_mu18_tight_mu8_EFFS", Get<Bool_t>("EF_mu18_tight_mu8_EFFS"));
+		fEvt->Set("EF_mu24i_tight", Get<Bool_t>("EF_mu24i_tight"));
     
 		///=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		/// Event level options
@@ -131,10 +167,18 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
 
 		/// Determine if this is Monte Carlo or not 
 		/// by looking for the process ID = mc_channel_number
-		//if(BranchNames().find(bmc_channel_number)!=BranchNames().end()) {
-		if(true) {
+		if(BranchNames().find("mc_channel_number")!=BranchNames().end()) {
+		//if(true) {
+			//cout << (float) Get<Float_t>("mc_event_weight") << " or " << Get<vector<vector<double> > >("mcevt_weight")[0][0] << endl;
 			fEvt->Set(mChannelNumber,(int)Get<UInt_t>("mc_channel_number"));
 			fEvt->Set(misMC,true);	
+
+			float averageIntPerXing = Get<Float_t>("averageIntPerXing");
+			averageIntPerXing = (Get<UInt_t>("lbn")==1 && int(averageIntPerXing+0.5)==1) ? 0. : averageIntPerXing;
+			float weight = myPRW->GetCombinedWeight(Get<UInt_t>("RunNumber"), Get<UInt_t>("mc_channel_number"), averageIntPerXing);
+			fEvt->Set("PRWweight", weight);
+			fEvt->Set("MCweight", Get<Float_t>("mc_event_weight"));
+
 		}
 		else {
 			fEvt->Set(misMC,          false);	
@@ -216,18 +260,49 @@ Bool_t EventBuilder_SMWZ::CopyJets()
 {
   if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyJets() Begin" << endl;
 
-	TString prefix("jet_AntiKt4LCTopo_");
+	//TString prefix("jet_AntiKt4LCTopo_");
+	TString prefix("jet_AntiKt4TopoEM_");
 
 	fEvt->AddVec("jets");
 
 	unsigned int nJets = Get<Int_t>(prefix + "n");
 	for(unsigned int iJ = 0; iJ < nJets; iJ++) {
 		Particle *jet = new Particle();
-		jet->p.SetPtEtaPhiM(
+
+		int npv = fEvt->Int("npv");
+
+		jet->p = myJetCalibrationTool->ApplyOffsetEtaJES(
+				Get<vector<float> >(prefix + "constscale_E")[iJ]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "constscale_eta")[iJ],
+				Get<vector<float> >(prefix + "constscale_eta")[iJ],
+				Get<vector<float> >(prefix + "constscale_phi")[iJ],
+				Get<vector<float> >(prefix + "constscale_m")[iJ]*UNITCONVERSION,
+				Get<Float_t>("averageIntPerXing"),
+				npv
+		);
+
+		/*jet->p = myJetCalibrationTool->ApplyJetAreaOffsetEtaJES(
+				Get<vector<float> >(prefix + "constscale_E")[iJ]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "constscale_eta")[iJ],
+				Get<vector<float> >(prefix + "constscale_phi")[iJ],
+				Get<vector<float> >(prefix + "m")[iJ]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "ActiveAreaPx")[iJ]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "ActiveAreaPy")[iJ]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "ActiveAreaPz")[iJ]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "ActiveAreaE")[iJ]*UNITCONVERSION,
+				Get<Float_t>("Eventshape_rhoKt4LC"),
+				Get<Float_t>("averageIntPerXing"),
+				npv
+		);*/
+
+		/*jet->p.SetPtEtaPhiM(
 			Get<vector<float> >(prefix + "pt")[iJ]*UNITCONVERSION,
 			Get<vector<float> >(prefix + "eta")[iJ],
 		  Get<vector<float> >(prefix + "phi")[iJ],
-			Get<vector<float> >(prefix + "m")[iJ]*UNITCONVERSION);
+			Get<vector<float> >(prefix + "m")[iJ]*UNITCONVERSION);*/
+
+		jet->Set("isBadLooseMinus", Get<vector<int> >(prefix + "isBadLooseMinus")[iJ]);
+		jet->Set("jvtxf", Get<vector<float> >(prefix + "jvtxf")[iJ]);
 
 		fEvt->Add("jets", jet);
 	}
@@ -271,12 +346,33 @@ Bool_t EventBuilder_SMWZ::CopyMuons()
 	unsigned int nMuons = Get<Int_t>("mu_staco_n");
 	for(unsigned int iMu = 0; iMu < nMuons; iMu++) {
 		Particle *muon = new Particle();
-		muon->p.SetPtEtaPhiM(
-			Get<vector<float> >(prefix + "pt")[iMu]*UNITCONVERSION,
-			Get<vector<float> >(prefix + "eta")[iMu],
-		  Get<vector<float> >(prefix + "phi")[iMu],
-			Get<vector<float> >(prefix + "m")[iMu]*UNITCONVERSION);
 		muon->Set("charge", Get<vector<int> >(prefix + "charge")[iMu]);
+
+		if(fEvt->Bool("isMC") && Get<vector<int> >(prefix + "isCombinedMuon")[iMu]) {
+			myMuonSmear->SetSeed(fEvt->Int("EventNumber"));
+			myMuonSmear->Event(
+					fabs(1.0/Get<vector<float> >(prefix + "me_qoverp")[iMu]) * sin(Get<vector<float> >(prefix + "me_theta")[iMu])*UNITCONVERSION,
+					fabs(1.0/Get<vector<float> >(prefix + "id_qoverp")[iMu]) * sin(Get<vector<float> >(prefix + "id_theta")[iMu])*UNITCONVERSION,
+					Get<vector<float> >(prefix + "pt")[iMu]*UNITCONVERSION,
+					Get<vector<float> >(prefix + "eta")[iMu],
+					Get<vector<int> >(prefix + "charge")[iMu]);
+
+			muon->p.SetPtEtaPhiM(
+				myMuonSmear->pTCB(),
+				Get<vector<float> >(prefix + "eta")[iMu],
+				Get<vector<float> >(prefix + "phi")[iMu],
+				Get<vector<float> >(prefix + "m")[iMu]*UNITCONVERSION);
+
+			if(myMuonSmear->ChargeFlipCB() == -1)
+				muon->Set("charge", -Get<vector<int> >(prefix + "charge")[iMu]);
+		}
+		else {
+			muon->p.SetPtEtaPhiM(
+				Get<vector<float> >(prefix + "pt")[iMu]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "eta")[iMu],
+				Get<vector<float> >(prefix + "phi")[iMu],
+				Get<vector<float> >(prefix + "m")[iMu]*UNITCONVERSION);
+		}
 
 		// Impact parameters
 		muon->Set("d0", Get<vector<float> >(prefix + "trackd0pv")[iMu]);

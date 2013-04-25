@@ -22,6 +22,10 @@
 #include <TLorentzVector.h>
 
 namespace Root {class TPileupReweighting;}
+namespace Root { class TGoodRunsList; }
+namespace MuonSmear { class SmearingClass; }
+class JetCalibrationTool;
+
 
 class EventBuilder_SMWZ : public EventBuilderBase {
 public :
@@ -85,12 +89,18 @@ public :
    bool doTrackJetLinks;
    bool doTrigger;
    bool doSubjets;
+   bool isGRL;
 
 	 // Constructor and destructor
    EventBuilder_SMWZ(TTree * /*tree*/ =0);
    virtual ~EventBuilder_SMWZ();
 
    AnalysisBase* fEvt;
+
+	 Root::TGoodRunsList* myGRL;
+	 JetCalibrationTool *myJetCalibrationTool;
+	 Root::TPileupReweighting *myPRW;
+	 MuonSmear::SmearingClass *myMuonSmear;
 
    ClassDef(EventBuilder_SMWZ,0);
 
