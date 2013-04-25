@@ -10,3 +10,4 @@
 *~
 *.par
 utils/*
+.nfs*
