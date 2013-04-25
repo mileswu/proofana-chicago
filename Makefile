@@ -49,6 +49,7 @@ INCLUDES += -I. -Icore -Ianalyses -Ieventbuilders -Iutils -I${ROOTSYS}/include -
 INCLUDES += -Iutils/TriggerMenuNtuple
 INCLUDES += -Iutils/mctlib 
 INCLUDES += -Iutils/fastjet/include
+INCLUDES += -Iutils/fastjet/tools
 INCLUDES += -Iutils/fastjet/plugins/FlavKt
 INCLUDES += -Iutils/qgTag
 INCLUDES += -Iutils/qgTag/include
@@ -111,6 +112,7 @@ TMNFILE  = $(OUTPUTDIR)/libTriggerMenuNtuple.so
 MCTFILE  = $(OUTPUTDIR)/libMctLib.so
 QGFILE = $(OUTPUTDIR)/libqgTag.so
 FASTJETFILE  = $(OUTPUTDIR)/libFastjet.so
+FASTJETTOOLS = $(OUTPUTDIR)/libFastjetTools.so
 FASTJETPLUGINFILE  = $(OUTPUTDIR)/libFastjetPlugins.so
 ROOTCORE = $(OUTPUTDIR)/RootCore_compiled.lock
 
@@ -154,10 +156,12 @@ $(FASTJETFILE) :
 ifeq ($(PLATFORM),macosx)
 	@ln -s ../utils/fastjet/install-dir/lib/libfastjet.dylib lib/libFastjet.so
 	@ln -s ../utils/fastjet/install-dir/lib/libfastjetplugins.dylib lib/libFastjetPlugins.so
+	@ln -s ../utils/fastjet/install-dir/lib/libfastjettools.dylib lib/libFastjetTools.so
 endif
 ifneq ($(PLATFORM),macosx)
 	@ln -s ../utils/fastjet/install-dir/lib/libfastjet.so lib/libFastjet.so
 	@ln -s ../utils/fastjet/install-dir/lib/libfastjetplugins.so lib/libFastjetPlugins.so
+	@ln -s ../utils/fastjet/install-dir/lib/libfastjettools.so lib/libFastjetTools.so
 endif
 
 # Rule to run RootCore compilation
@@ -215,7 +219,8 @@ $(PARFILE): $(CXXLIST) $(HLIST) $(LDEFFILE)
 -include $(DLIST)
 
 ProofAnaCint: $(CINTOBJ) $(ANACINTOBJLIST) $(FECINTOBJLIST)
-shlib: solib parlib
+#shlib: solib parlib
+shlib: solib
 solib: $(LIBFILE) $(QGFILE) $(TMNFILE) $(MCTFILE) $(FASTJETFILE) $(ROOTCORE)
 parlib: $(PARFILE)
 
