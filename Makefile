@@ -221,14 +221,15 @@ $(PARFILE): $(CXXLIST) $(HLIST) $(LDEFFILE)
 ProofAnaCint: $(CINTOBJ) $(ANACINTOBJLIST) $(FECINTOBJLIST)
 #shlib: solib parlib
 shlib: solib
-solib: $(LIBFILE) $(QGFILE) $(TMNFILE) $(MCTFILE) $(FASTJETFILE) $(ROOTCORE)
+#solib: $(LIBFILE) $(QGFILE) $(TMNFILE) $(MCTFILE) $(FASTJETFILE) $(ROOTCORE)
+solib: $(LIBFILE) $(ROOTCORE)
 parlib: $(PARFILE)
 
 clean:
 	@rm -f */*.o */*.d */*Cint* */*.so */*.lock */*.par
 	@sh scripts/RootCore_clean.sh
-	@make -C utils/TriggerMenuNtuple/cmd -f Makefile cleanall
-	@make -C utils/mctlib/ -f Makefile clean
-	@make -C utils/fastjet/ -f Makefile clean
-	@make -C utils/qgTag -f makefile clean
+#	@make -C utils/TriggerMenuNtuple/cmd -f Makefile cleanall
+#	@make -C utils/mctlib/ -f Makefile clean
+#	@make -C utils/fastjet/ -f Makefile clean
+#	@make -C utils/qgTag -f makefile clean
 
