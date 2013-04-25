@@ -1,51 +1,55 @@
 #include <TList.h>
 #include <TString.h>
 #include <TFileCollection.h>
-#include <TDataSetManagerFile.h>
+#include <TFile.h>
+#include "../scripts/helperFunc.C"
 
-void runLocal(TString dataset, TString treename = "", int nfiles = -1)
+int runLocal(const char *dataset, const char *treename, int nfiles = -1)
 {
-	ProofAna* ana = new ProofAna();
+  LoadLibraries();
 	
-	//Need to provide a TList for local running
-	TList* list = new TList();
-	ana->SetInputList(list);
+	TString dsetfilename(dataset);
+	dsetfilename.Append(".txt");
+	dsetfilename.Prepend("../filelists/");
 
-	// Load dataset manager stuff, uses same local datasets as PROOF-Lite by design
-	TString dsetdir(gSystem->HomeDirectory());
-	dsetdir.Append("/.proof/datasets");
-	dsetdir.Prepend("dir:");
-	TDataSetManagerFile mgr(dsetdir);
-	
-	TString dsetfile(dataset);
-	dsetfile.Append(".txt");
-	dsetfile.Prepend("../filelists/");
-
-	//Register dataset, if non-existent
-	if(!mgr.ExistsDataSet(dataset)) {
-		TFileCollection* dset = new TFileCollection(dataset,"",dsetfile, nfiles);
-		mgr.RegisterDataSet(dataset,dset,"V"); //This seems to return true regardless of success or failure at the moment
-		if(treename.CompareTo("")!=0) {
-			TProof* lite = TProof::Open("lite://");
-			lite->SetDataSetTreeName(dataset,treename);
-			delete lite;
-		}
+	ifstream dsetfile(dsetfilename.Data());
+	if(!dsetfile.is_open()) {
+		cout << "Can't find file at: " << dsetfilename.Data() << endl;
+		return;
 	}
-	mgr.ShowDataSets();
 
-	// And yes, all this dataset garbage was to get the default tree name
-	TFileCollection* dset = mgr.GetDataSet(dataset);
-	TString defaultTree = dset->GetDefaultTreeName();
-	
-	// Make TChain from TFileCollection...doesn't seem like there is a more direct way
-	if(defaultTree.First("/")==0) defaultTree.Remove(0,1);
-	TChain* T = new TChain(defaultTree);
-	TList* filelist = (TList*)dset->GetList();
-	TIter next(filelist);
-	TFileInfo* fileinfo = 0;
-	while ((fileinfo = (TFileInfo*)next())) T->AddFile(fileinfo->GetCurrentUrl()->GetUrl());
-	
-	// Process TChain
-	T->Process(ana);
+	std::vector<std::string> fileList;
+	int linenum = 0;
+	int n_files = 0;
+	string line;
+	while (getline(dsetfile, line)) {
+			fileList.push_back(line);
+			n_files++;
+			linenum++;
+	}
+	dsetfile.close();
+
+  TChain fChain(treename);
+  for (int iFile=0; iFile<fileList.size(); ++iFile)
+  {
+		if(nfiles != -1 && iFile >= nfiles) break;
+    std::cout << "open " << fileList[iFile].c_str() << std::endl;
+    fChain.Add(fileList[iFile].c_str());
+  }
+
+	ProofAna* ana = new ProofAna();
+
+  //Need to provide a TList for local running
+  TList* list = new TList();
+  ana->SetInputList(list);
+
+  // Process TChain
+  int result = fChain.Process(ana);
+  if(result!=-1){ 
+    return 0;
+  }
+  // if we get here, we had an error!
+  cout << "Error processing TChain!" << endl;
+  return 1;
 }
-
+ 
