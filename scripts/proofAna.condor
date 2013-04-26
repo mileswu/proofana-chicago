@@ -1,0 +1,12 @@
+universe = vanilla
+Executable = ../scripts/runCondor.sh
+Output = log/proofana-$ENV(DATASET)_$(Process).out
+Error = log/proofana-$ENV(DATASET)_$(Process).err
+Log = log/proofana-$ENV(DATASET)_$(Process).log
+Transfer_Input_Files=../condor/proofana-condor.tar, $ENV(X509_USER_PROXY), $ENV(JOBTAR)
+Should_Transfer_Files = YES
+WhenToTransferOutput = ON_EXIT
+notification = never
+environment = "NUMPERNODE=$ENV(NUMPERNODE)"
+arguments = $(Process)
+Queue $ENV(NUMNODES)
