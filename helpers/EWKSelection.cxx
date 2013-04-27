@@ -27,38 +27,69 @@ bool passesMCPQualityCuts(Particle &muon) {
 }
 
 // Reference: https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/WZElectroweakCommonTopics2012#Muon_Selection
-bool EWKMuonSelectionPasses(Particle &muon, double ptcut, double etacut, TH1* cutflow) {
+bool EWKMuonSelectionPasses(Particle &muon, double ptcut, double etacut, TH1* cutflow, TH1* objselection) {
+	bool pass = true;
 
   int iCount=0;
   cutflow->Fill(iCount); iCount++;
+	objselection->Fill(0);
   
   // Quality cuts
-  if(muon.Int("author") != MUON_PARAM_AUTHOR_STACO) return false;
-  cutflow->Fill(iCount); iCount++;
-  if(muon.Int("isCombined") != true) return false;
-  cutflow->Fill(iCount); iCount++;
-  if(passesMCPQualityCuts(muon) != true) return false; 
-  cutflow->Fill(iCount); iCount++;
+  if(muon.Int("author") != MUON_PARAM_AUTHOR_STACO) pass = false;
+	else objselection->Fill(1);
+  cutflow->Fill(iCount);
+	iCount++;
+
+  if(muon.Int("isCombined") != true) pass = false;
+	else objselection->Fill(2);
+  cutflow->Fill(iCount);
+	iCount++;
+
+  if(passesMCPQualityCuts(muon) != true) pass = false; 
+	else objselection->Fill(5);
+  cutflow->Fill(iCount);
+	iCount++;
   
   // Kinematic cuts
-  if(fabs(muon.p.Eta()) > etacut) return false;
-  cutflow->Fill(iCount); iCount++;
-  if(muon.p.Pt() < ptcut) return false;
-  cutflow->Fill(iCount); iCount++;
+  if(fabs(muon.p.Eta()) > etacut) pass = false;
+	else objselection->Fill(8);
+  cutflow->Fill(iCount);
+	iCount++;
+  if(muon.p.Pt() < ptcut) pass = false;
+	else objselection->Fill(7);
+  cutflow->Fill(iCount);
+	iCount++;
   
   // Isolation
-  if(muon.Float("Etcone20") / muon.p.Pt() > 0.3) return false;
-  cutflow->Fill(iCount); iCount++;
-  if(muon.Float("Ptcone20") / muon.p.Pt() > 0.15) return false;
-  cutflow->Fill(iCount); iCount++;
+  if(muon.Float("Etcone20") / muon.p.Et() > 0.3) pass = false;
+	else objselection->Fill(9);
+  cutflow->Fill(iCount);
+	iCount++;
+  if(muon.Float("Ptcone20") / muon.p.Pt() > 0.15) pass = false;
+	else objselection->Fill(10);
+  cutflow->Fill(iCount);
+	iCount++;
   
   // Impact parameter cuts
-  if(fabs(muon.Float("z0")) > 2) return false;
-  cutflow->Fill(iCount); iCount++;
-  if(fabs(muon.Float("d0") / muon.Float("d0_err")) > 3.5) return false;
-  cutflow->Fill(iCount); iCount++;
+  if(fabs(muon.Float("z0") * sin(muon.Float("tracktheta"))) > 1) pass = false;
+	else objselection->Fill(4);
+  cutflow->Fill(iCount);
+	iCount++;
+  if(fabs(muon.Float("d0") / muon.Float("d0_err")) > 6) pass = false;
+  //if(fabs(muon.Float("d0") / muon.Float("d0_err")) > 3.5) pass = false;
+	else objselection->Fill(3);
+  cutflow->Fill(iCount);
+	iCount++;
+
+	//if(fabs(muon.Float("id_qoverp") - muon.Float("me_qoverp")) / sqrt(pow(muon.Float("id_qoverp_err"), 2.0) + pow(muon.Float("me_qoverp_err"), 2.0)) > 5) pass = false;
+	if(fabs(muon.Float("id_qoverp") - muon.Float("me_qoverp")) / sqrt(pow(muon.Float("id_qoverp_err"), 2.0) + pow(muon.Float("me_qoverp_err"), 2.0)) > 0.5) pass = false;
+	else objselection->Fill(6);
+	cutflow->Fill(iCount);
+	iCount++;
+	
+	if(pass) objselection->Fill(11);
   
-  return true;
+  return pass;
 }
 
 void EWKMuonSelectionFilter(AnalysisBase *analysis, const MomKey& key, double ptcut, double etacut) {
@@ -68,13 +99,18 @@ void EWKMuonSelectionFilter(AnalysisBase *analysis, const MomKey& key, double pt
     analysis->OutputDir()->cd();
     new TH1F("EWK_muon_selection_cutflow","EWK_muon_selection_cutflow",20,0,20);
   }
+  if(!analysis->OutputDir()->Get("EWK_muon_selection_objselection")) {
+    analysis->OutputDir()->cd();
+    new TH1F("EWK_muon_selection_objselection","EWK_muon_selection_objselection",20,0,20);
+  }
 
   TH1 *cutflow = dynamic_cast<TH1*>(analysis->OutputDir()->Get("EWK_muon_selection_cutflow"));
+  TH1 *objselection = dynamic_cast<TH1*>(analysis->OutputDir()->Get("EWK_muon_selection_objselection"));
 
   for(int iE=analysis->Objs(key)-1; iE >= 0; iE--) { // reverse loop
     Particle &muon = *dynamic_cast<Particle *>(analysis->Obj(key, iE));
     
-    if(EWKMuonSelectionPasses(muon, ptcut, etacut, cutflow) == false) {
+    if(EWKMuonSelectionPasses(muon, ptcut, etacut, cutflow, objselection) == false) {
       analysis->Remove(key, iE);
     }
   }

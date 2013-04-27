@@ -151,7 +151,7 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
 
 		fEvt->Set("PassedGRL", true);
 #ifdef GOODRUNLIST
-		if(isGRL) {
+		if(myGRL) {
 			if(!myGRL)
 				Abort("GRL not loaded");
 			if(!myGRL->HasRunLumiBlock(Get<UInt_t>("RunNumber"), Get<UInt_t>("lbn"))) {
@@ -284,8 +284,8 @@ Bool_t EventBuilder_SMWZ::CopyJets()
 {
   if (fEvt->Debug()) cout << "EventBuilder_SMWZ::CopyJets() Begin" << endl;
 
-	//TString prefix("jet_AntiKt4LCTopo_");
-	TString prefix("jet_AntiKt4TopoEM_");
+	TString prefix("jet_AntiKt4LCTopo_");
+	//TString prefix("jet_AntiKt4TopoEM_");
 
 	fEvt->AddVec("jets");
 
@@ -381,12 +381,18 @@ Bool_t EventBuilder_SMWZ::CopyMuons()
 			Get<vector<float> >(prefix + "phi")[iMu],
 			Get<vector<float> >(prefix + "m")[iMu]*UNITCONVERSION);
 
+		muon->Set("id_qoverp", Get<vector<float> >(prefix + "id_qoverp")[iMu]/UNITCONVERSION);
+		muon->Set("me_qoverp", Get<vector<float> >(prefix + "me_qoverp")[iMu]/UNITCONVERSION);
+		muon->Set("id_qoverp_err", sqrt(Get<vector<float> >(prefix + "id_cov_qoverp_exPV")[iMu])/UNITCONVERSION);
+		muon->Set("me_qoverp_err", sqrt(Get<vector<float> >(prefix + "me_cov_qoverp_exPV")[iMu])/UNITCONVERSION);
+		muon->Set("id_pt", fabs(1.0/Get<vector<float> >(prefix + "id_qoverp")[iMu]) * sin(Get<vector<float> >(prefix + "id_theta")[iMu])*UNITCONVERSION);
+		muon->Set("me_pt", fabs(1.0/Get<vector<float> >(prefix + "me_qoverp")[iMu]) * sin(Get<vector<float> >(prefix + "me_theta")[iMu])*UNITCONVERSION);
 #ifdef MUONSMEARING
 		if(fEvt->Bool("isMC") && Get<vector<int> >(prefix + "isCombinedMuon")[iMu]) {
-			myMuonSmear->SetSeed(fEvt->Int("EventNumber"));
+			myMuonSmear->SetSeed(fEvt->Int("EventNumber"), iMu);
 			myMuonSmear->Event(
-					fabs(1.0/Get<vector<float> >(prefix + "me_qoverp")[iMu]) * sin(Get<vector<float> >(prefix + "me_theta")[iMu])*UNITCONVERSION,
-					fabs(1.0/Get<vector<float> >(prefix + "id_qoverp")[iMu]) * sin(Get<vector<float> >(prefix + "id_theta")[iMu])*UNITCONVERSION,
+					muon->Float("id_pt"),
+					muon->Float("me_pt"),
 					Get<vector<float> >(prefix + "pt")[iMu]*UNITCONVERSION,
 					Get<vector<float> >(prefix + "eta")[iMu],
 					Get<vector<int> >(prefix + "charge")[iMu]);
@@ -403,9 +409,10 @@ Bool_t EventBuilder_SMWZ::CopyMuons()
 #endif
 
 		// Impact parameters
-		muon->Set("d0", Get<vector<float> >(prefix + "trackd0pv")[iMu]);
-		muon->Set("d0_err", Get<vector<float> >(prefix + "tracksigd0pv")[iMu]);
-		muon->Set("z0", Get<vector<float> >(prefix + "trackz0pv")[iMu]);
+		muon->Set("d0", Get<vector<float> >(prefix + "trackd0pvunbiased")[iMu]);
+		muon->Set("d0_err", Get<vector<float> >(prefix + "tracksigd0pvunbiased")[iMu]);
+		muon->Set("z0", Get<vector<float> >(prefix + "trackz0pvunbiased")[iMu]);
+		muon->Set("tracktheta", Get<vector<float> >(prefix + "tracktheta")[iMu]);
 
 		muon->Set("isCombined", Get<vector<int> >(prefix + "isCombinedMuon")[iMu]);
 		muon->Set("author", Get<vector<int> >(prefix + "author")[iMu]);
