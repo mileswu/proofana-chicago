@@ -54,6 +54,8 @@
 #pragma link C++ class pair<Key<2>,vector<Key<2> > >+;
 
 
+#pragma link C++ class vector<vector<int> >+; 
+
 #endif
 
 #endif

@@ -23,6 +23,14 @@
 #include <iostream>
 #include "TPRegexp.h"
 
+#include <vector>
+#ifdef __MAKECINT__
+#pragma link C++ class vector<vector<double> >+;
+#pragma link C++ class vector<vector<float> >+;
+#pragma link C++ class vector<vector<int> >+;
+#endif
+
+
 #ifdef GOODRUNLIST
 	#include "GoodRunsLists/TGoodRunsList.h"
 #endif
@@ -331,6 +339,7 @@ Bool_t EventBuilder_SMWZ::CopyJets()
 
 		jet->Set("isBadLooseMinus", Get<vector<int> >(prefix + "isBadLooseMinus")[iJ]);
 		jet->Set("jvtxf", Get<vector<float> >(prefix + "jvtxf")[iJ]);
+		jet->Set("MV1", Get<vector<float> >(prefix + "flavor_weight_MV1")[iJ]);
 
 		fEvt->Add("jets", jet);
 	}
@@ -534,6 +543,9 @@ Bool_t EventBuilder_SMWZ::CopyTracks()
 				Get<vector<float> >("trk_eta")[iT],
 				Get<vector<float> >("trk_phi_wrtPV")[iT],
 				0);
+
+		int charge = round(Get<vector<float> >("trk_qoverp_wrtPV")[iT]/UNITCONVERSION * track->p.P());
+		track->Set("charge", charge);
 
 		track->Set("d0", Get<vector<float> >("trk_d0_wrtPV")[iT]);
 		track->Set("z0", Get<vector<float> >("trk_z0_wrtPV")[iT]);
