@@ -2,8 +2,8 @@
 #include <fstream>
 using namespace std;
 
-void runCondor(TString dataset) {
-	int numpernode = 5;
+void runCondor(TString dataset, TString identifier) {
+	int numpernode = 25;
 
 	TString dsetfilename(dataset);
 	dsetfilename.Append(".txt");
@@ -31,7 +31,7 @@ void runCondor(TString dataset) {
 	cout << "Number of files: " << n_files << endl;
 	cout << "Number of nodes needed: " << numnodes << endl;
 
-	numnodes = 1;
+	//numnodes = 1;
 
 	stringstream env_numpernode;
 	env_numpernode << numpernode;
@@ -41,6 +41,7 @@ void runCondor(TString dataset) {
 	gSystem->Setenv("NUMPERNODE", env_numpernode.str().c_str());
 	gSystem->Setenv("NUMNODES", env_numnodes.str().c_str());
 	gSystem->Setenv("DATASET", dataset);
+	gSystem->Setenv("IDENTIFIER", identifier);
 
 	stringstream exec_tar, env_jobtar;
 	stringstream uuid; uuid << TUUID().AsString();
@@ -57,5 +58,6 @@ void runCondor(TString dataset) {
 	gSystem->Unsetenv("NUMPERNODE");
 	gSystem->Unsetenv("NUMNODES");
 	gSystem->Unsetenv("DATASET");
+	gSystem->Unsetenv("IDENTIFIER");
 	gSystem->Unsetenv("JOBTAR");
 }
