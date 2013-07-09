@@ -30,7 +30,7 @@ ls $ATLAS_LOCAL_ROOT_BASE
 source ${ATLAS_LOCAL_ROOT_BASE}/user/atlasLocalSetup.sh
 export X509_USER_PROXY=`pwd`/gridproxy.cert
 export XrdSecGSISRVNAMES="*"
-localSetupROOT --rootVersion=5.34.03-x86_64-slc5-gcc4.3
+localSetupROOT --rootVersion=5.34.07-x86_64-slc5-gcc4.3
 
 cd $JOBDIR/ProofAna/utils/RootCore
 ./configure

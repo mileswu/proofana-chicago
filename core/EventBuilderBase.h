@@ -200,7 +200,7 @@ private :
 
 			branch = fBranches.insert(map<BranchKey,BranchContainer>::value_type(key,BranchContainer())).first;
 
-			Tree()->SetBranchAddress(key.Data(), &branch->second.Obj, &branch->second.Branch);
+			Tree()->SetBranchAddress(key.Data(), (void*)&branch->second.Obj, &branch->second.Branch);
 
 			if(branch->second.Branch->IsA() == TBranchElement::Class()) {
 				TClass* tclass = TClass::GetClass(((TBranchElement*)branch->second.Branch)->GetTypeName());

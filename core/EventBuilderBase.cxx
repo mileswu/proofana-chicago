@@ -52,7 +52,7 @@ Bool_t EventBuilderBase::NotifyBase()
 	for(; branch!=fBranches.end();) {
 		if(fBranchNames.find(branch->first.Data())==fBranchNames.end()) fBranches.erase(branch++);
 		else if(!branch->second.Delete) {
-			Tree()->SetBranchAddress(branch->first.Data(), &branch->second.Obj, &branch->second.Branch);
+			Tree()->SetBranchAddress(branch->first.Data(), (void*)&branch->second.Obj, &branch->second.Branch);
 			++branch;
 		}
 		else {
