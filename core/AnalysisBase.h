@@ -20,6 +20,7 @@
 #include "Event.h"
 #include "Key.h"
 #include "TDirCache.h"
+#include "TH1.h"
 #include <cmath>
 
 class SelectorBase;
@@ -60,6 +61,9 @@ public :
 	void				BookCutflow(AnaKey name); //same as BookCutflow() except calls SetPrefix() first
 	void				BookCutflowNoPrefix(AnaKey name); //same as BookCutflow(AnaKey name) except specifies name without changing prefixes
 
+	TH1F*				FindOrCreateTH1F(const char *name, Int_t nbinsx, Double_t xlow, Double_t xup);
+	void				Fill(TH1* hist, const double a);
+	void				Fill(TH1* hist, const double a, const double b);
 
     //Write TTree with Event class or direct skim of underlying ntuple 
 	void FillTree(AnaKey treename); //call during ProcessEvent to select an event to be written to tree

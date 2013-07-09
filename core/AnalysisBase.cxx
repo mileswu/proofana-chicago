@@ -282,6 +282,34 @@ void AnalysisBase::BookCutflowNoPrefix(AnaKey flowpoint)
 	cutflow->Fill(0.,Weight());
 }
 
+
+TH1F* AnalysisBase::FindOrCreateTH1F(const char *name, Int_t nbinsx, Double_t xlow, Double_t xup)
+{
+	TObject* obj = OutputDir()->Get(name);
+	TH1F* th1 = dynamic_cast<TH1F*>(obj);
+
+	if(!th1) { 
+		th1 = new TH1F(name, "", nbinsx, xlow, xup);
+	}
+	return th1;
+}
+
+void AnalysisBase::Fill(TH1* hist, const double a)
+{
+	hist->Fill(a, Weight());
+}
+
+void AnalysisBase::Fill(TH1* hist, const double a, const double b)
+{
+	TH2* th2 = dynamic_cast<TH2*>(hist);
+	if(th2) {
+		th2->Fill(a,b,Weight());
+	}
+	else {
+		hist->Fill(a,Weight()*b);
+	}
+}
+
 void AnalysisBase::Fill(AnaKey name, const double a)
 {
 	AnaKey histoname(fPrefix+name);
