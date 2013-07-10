@@ -24,6 +24,7 @@
 namespace Root {class TPileupReweighting;}
 namespace Root { class TGoodRunsList; }
 namespace MuonSmear { class SmearingClass; }
+namespace egRescaler { class EnergyRescalerUpgrade; }
 class JetCalibrationTool;
 
 
@@ -101,6 +102,7 @@ public :
 	 JetCalibrationTool *myJetCalibrationTool;
 	 Root::TPileupReweighting *myPRW;
 	 MuonSmear::SmearingClass *myMuonSmear;
+	 egRescaler::EnergyRescalerUpgrade *myErs;
 
    ClassDef(EventBuilder_SMWZ,0);
 

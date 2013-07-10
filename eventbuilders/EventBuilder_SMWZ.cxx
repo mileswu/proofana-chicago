@@ -43,6 +43,10 @@
 	#include "MuonMomentumCorrections/SmearingClass.h"
 #endif
 
+#ifdef ELECTRONSMEARING
+	#include "egammaAnalysisUtils/EnergyRescalerUpgrade.h"
+#endif
+
 #ifdef PILEUPREWEIGHTING
 #include "PileupReweighting/TPileupReweighting.h"
 #endif
@@ -82,6 +86,10 @@ void EventBuilder_SMWZ::Initialize()
 
 #ifdef MUONSMEARING
 	myMuonSmear = (MuonSmear::SmearingClass*)fInput->FindObject("myMuonSmear");
+#endif
+
+#ifdef ELECTRONSMEARING
+	myErs = (egRescaler::EnergyRescalerUpgrade*)fInput->FindObject("myErs");
 #endif
 }
 
@@ -511,6 +519,13 @@ Bool_t EventBuilder_SMWZ::CopyElectrons()
 				Get<vector<float> >(prefix + "eta")[iE],
 				Get<vector<float> >(prefix + "phi")[iE],
 				Get<vector<float> >(prefix + "m")[iE]*UNITCONVERSION);
+
+#ifdef ELECTRONSMEARING
+		if(fEvt->Bool("isMC")) {
+			myErs->SetRandomSeed(fEvt->Int("EventNumber") + 100*iE);
+			electron->p *= myErs->getSmearingCorrection(electron->p.Eta(), electron->p.E()/UNITCONVERSION, egRescaler::EnergyRescalerUpgrade::NOMINAL);
+		}
+#endif
 		
 		// Isolation cones
 		electron->Set("Ptcone20", Get<vector<float> >(prefix + "ptcone20")[iE]*UNITCONVERSION);
