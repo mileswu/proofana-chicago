@@ -464,9 +464,9 @@ Bool_t EventBuilder_SMWZ::CopyElectrons()
 		Particle *electron = new Particle();
 		electron->Set("charge", Get<vector<int> >(prefix + "charge")[iE]);
 		
-		electron->Set("d0_err", Get<vector<float> >(prefix + "tracksigd0pv")[iE]);
-		electron->Set("z0", Get<vector<float> >(prefix + "trackz0pv")[iE]);
-		electron->Set("d0", Get<vector<float> >(prefix + "trackd0pv")[iE]);
+		electron->Set("d0_err", Get<vector<float> >(prefix + "tracksigd0pvunbiased")[iE]);
+		electron->Set("z0", Get<vector<float> >(prefix + "trackz0pvunbiased")[iE]);
+		electron->Set("d0", Get<vector<float> >(prefix + "trackd0pvunbiased")[iE]);
 
 		// Quality
 		electron->Set("nPixHits", Get<vector<int> >(prefix + "nPixHits")[iE]);
@@ -492,19 +492,25 @@ Bool_t EventBuilder_SMWZ::CopyElectrons()
 		electron->Set("clusterPhi", Get<vector<float> >(prefix + "cl_phi")[iE]);
 		electron->Set("clusterE", Get<vector<float> >(prefix + "cl_E")[iE]*UNITCONVERSION);
 
-		if(electron->Int("nPixHits") + electron->Int("nSCTHits") >= 4) {
+		/*if(electron->Int("nPixHits") + electron->Int("nSCTHits") >= 4) {
 			electron->p.SetPtEtaPhiM(
 				electron->Float("clusterE") / cosh(electron->Float("trackEta")),
 				electron->Float("trackEta"),
 				electron->Float("trackPhi"),
 				electron_mass);
+			cout << electron->p.Pt() << "," << Get<vector<float> >(prefix+ "pt")[iE]*UNITCONVERSION << endl;
 		} else {
 			electron->p.SetPtEtaPhiM(
 				electron->Float("clusterE") / cosh(electron->Float("clusterEta")),
 				electron->Float("clusterEta"),
 				electron->Float("clusterPhi"),
 				electron_mass);
-		}
+		}*/
+		electron->p.SetPtEtaPhiM(
+				Get<vector<float> >(prefix + "pt")[iE]*UNITCONVERSION,
+				Get<vector<float> >(prefix + "eta")[iE],
+				Get<vector<float> >(prefix + "phi")[iE],
+				Get<vector<float> >(prefix + "m")[iE]*UNITCONVERSION);
 		
 		// Isolation cones
 		electron->Set("Ptcone20", Get<vector<float> >(prefix + "ptcone20")[iE]*UNITCONVERSION);
