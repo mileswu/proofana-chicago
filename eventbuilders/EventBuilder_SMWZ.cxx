@@ -491,6 +491,7 @@ Bool_t EventBuilder_SMWZ::CopyElectrons()
 		electron->Set("OQ", Get<vector<unsigned int> >(prefix + "OQ")[iE]);
 		
 		// Pt/Eta/Phi
+		electron->Set("tracktheta", Get<vector<float> >(prefix + "tracktheta")[iE]);
 		electron->Set("trackEta", Get<vector<float> >(prefix + "tracketa")[iE]);
 		electron->Set("trackPhi", Get<vector<float> >(prefix + "trackphi")[iE]);
 		electron->Set("trackPt", Get<vector<float> >(prefix + "trackpt")[iE]*UNITCONVERSION);
