@@ -190,6 +190,10 @@ Bool_t EventBuilder_SMWZ::CopyEvent(AnalysisBase* evt)
 
 		fEvt->Set("EF_mu18_tight_mu8_EFFS", Get<Bool_t>("EF_mu18_tight_mu8_EFFS"));
 		fEvt->Set("EF_mu24i_tight", Get<Bool_t>("EF_mu24i_tight"));
+		fEvt->Set("EF_mu36_tight", Get<Bool_t>("EF_mu36_tight"));
+		fEvt->Set("EF_e24vhi_medium1", Get<Bool_t>("EF_e24vhi_medium1"));
+		fEvt->Set("EF_e60_medium1", Get<Bool_t>("EF_e60_medium1"));
+		fEvt->Set("EF_2e12Tvh_loose1", Get<Bool_t>("EF_2e12Tvh_loose1"));
     
 		///=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		/// Event level options
