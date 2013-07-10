@@ -309,18 +309,7 @@ Bool_t EventBuilder_SMWZ::CopyJets()
 		int npv = fEvt->Int("npv");
 
 #ifdef APPLYJETCALIBRATION
-
-		jet->p = myJetCalibrationTool->ApplyOffsetEtaJES(
-				Get<vector<float> >(prefix + "constscale_E")[iJ]*UNITCONVERSION,
-				Get<vector<float> >(prefix + "constscale_eta")[iJ],
-				Get<vector<float> >(prefix + "constscale_eta")[iJ],
-				Get<vector<float> >(prefix + "constscale_phi")[iJ],
-				Get<vector<float> >(prefix + "constscale_m")[iJ]*UNITCONVERSION,
-				Get<Float_t>("averageIntPerXing"),
-				npv
-		);
-
-		/*jet->p = myJetCalibrationTool->ApplyJetAreaOffsetEtaJES(
+		jet->p = myJetCalibrationTool->ApplyJetAreaOffsetEtaJES(
 				Get<vector<float> >(prefix + "constscale_E")[iJ]*UNITCONVERSION,
 				Get<vector<float> >(prefix + "constscale_eta")[iJ],
 				Get<vector<float> >(prefix + "constscale_phi")[iJ],
@@ -332,8 +321,7 @@ Bool_t EventBuilder_SMWZ::CopyJets()
 				Get<Float_t>("Eventshape_rhoKt4LC"),
 				Get<Float_t>("averageIntPerXing"),
 				npv
-		);*/
-
+		);
 #endif
 
 
