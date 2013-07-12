@@ -43,33 +43,7 @@ ifneq ($(CXX),clang++)
 	CXXFLAGS += -fno-builtin-memcmp
 endif
 
-INCLUDES += -I. -Icore -Ianalyses -Ieventbuilders -Iutils -I${ROOTSYS}/include -Ihelpers
-
-# add utils subdirectories if needed
-INCLUDES += -Iutils/TriggerMenuNtuple
-INCLUDES += -Iutils/mctlib 
-INCLUDES += -Iutils/fastjet/include
-INCLUDES += -Iutils/fastjet/tools
-INCLUDES += -Iutils/fastjet/plugins/FlavKt
-INCLUDES += -Iutils/qgTag
-INCLUDES += -Iutils/qgTag/include
-INCLUDES += -Iutils/TrigRootAnalysis
-INCLUDES += -Iutils/MuonMomentumCorrections
-INCLUDES += -Iutils/MuonEfficiencyCorrections
-INCLUDES += -Iutils/egammaEvent
-INCLUDES += -Iutils/egammaAnalysisUtils
-INCLUDES += -Iutils/ObjectSelectorCore
-INCLUDES += -Iutils/JetSelectorTools
-INCLUDES += -Iutils/CalibrationDataInterface
-INCLUDES += -Iutils/GoodRunsLists
-INCLUDES += -Iutils/PileupReweighting 
-INCLUDES += -Iutils/ReweightUtils
-INCLUDES += -Iutils/SUSYTools
-INCLUDES += -Iutils/JetUncertainties
-INCLUDES += -Iutils/JetResolution
-INCLUDES += -Iutils/MissingETUtility
-INCLUDES += -Iutils/ApplyJetCalibration
-INCLUDES += -Iutils/FakeLeptBkg
+INCLUDES += -I. -Icore -Ianalyses -Ieventbuilders -Iutils -I${ROOTSYS}/include -Ihelpers -Iutils/RootCore/include
 
 # Need these to avoid loading dependent libraries when ROOT starts
 LINKLIBS = -L${ROOTSYS}/lib -lHist -lMatrix -lTree -lNet -lProofPlayer -lProof -lRIO -lThread -lMathCore -lPhysics
