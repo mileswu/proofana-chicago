@@ -493,7 +493,7 @@ class MomentObj : public TNamed {
 		bool Set(const MomKey& key, const TString& value);
 		bool Set(const MomKey& key, const char* value) {return Set(key,TString(value));}
 		bool Set(const MomKey& key, const std::string& value) {return Set(key,TString(value.c_str()));}
-		bool Set(const MomKey& key, TObject *value);
+		bool Set(const MomKey& key, TObject *value, bool weakref = false);
 
 		bool Get(const MomKey& key, bool& value) const;
 		bool Get(const MomKey& key, unsigned int& value) const;

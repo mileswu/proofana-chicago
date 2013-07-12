@@ -307,13 +307,13 @@ bool MomentObj::Set(const MomKey& key, const TString& value) {
 	return true;
 }
 
-bool MomentObj::Set(const MomKey& key, TObject *value) {
+bool MomentObj::Set(const MomKey& key, TObject *value, bool weakref) {
 	map<MomKey,MapObj*>::iterator iter;
 	if(Find(key,iter)) {
 		delete iter->second;
-		iter->second = new ObjVecObj();
+		iter->second = new ObjVecObj(weakref);
 	}
-	else m_keyMap.insert(iter, map<MomKey,MapObj*>::value_type(key, new ObjVecObj()));
+	else m_keyMap.insert(iter, map<MomKey,MapObj*>::value_type(key, new ObjVecObj(weakref)));
 
 	Add(key, value);
 	return true;
